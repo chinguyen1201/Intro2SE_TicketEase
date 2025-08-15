@@ -1,0 +1,251 @@
+:root{
+  --bg:#1f1f1f;         /* nền xám đậm */
+  --panel:#2a2a2a;      /* panel */
+  --text:#e6e6e6;       /* chữ chính */
+  --muted:#b6b6b6;      /* chữ phụ */
+  --primary:#00b36b;    /* xanh TicketEase */
+  --card:#333;          /* thẻ */
+  --border:#3c3c3c;
+}
+
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{
+  margin:0; font-family:Inter,system-ui,Arial,sans-serif;
+  background:var(--bg); color:var(--text);
+}
+
+.container{max-width:1200px;margin:0 auto;padding:0 16px}
+
+/* Navbar */
+/* ===== NAVBAR ===== */
+.navbar{position:sticky; top:0; z-index:20}
+
+/* thanh xanh trên cùng */
+.navbar .bar{
+  background:var(--primary); color:#fff;
+  display:flex; align-items:center; 
+  gap:24px; 
+  height:66px;
+  position: sticky
+}
+
+.brand{
+  font-weight:800; 
+  font-size:24px;
+  background-color: #00b36b;
+  padding: 12px 16px;
+}
+
+.navbar .bar > .container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 66px;
+}
+
+/* SEARCH */
+.search{flex:1; display:flex; justify-content:center}
+
+.search-field{
+  position:relative; width:480px; max-width:560px;
+}
+
+.search-field input{
+  width:100%; height:40px; border-radius:8px; border:none; outline:none;
+  background:#fff; color:#222; padding:0 12px 0 36px; /* chừa chỗ icon trái */
+  box-shadow:0 0 0 1px rgba(0,0,0,.06) inset;
+}
+.search-ico{
+  position:absolute; left:10px; top:50%; transform:translateY(-50%);
+  color:#888;
+}
+
+/* ACTIONS bên phải: nút bo tròn + link vé + đăng nhập | đăng ký */
+.nav-actions{display:flex; align-items:center; gap:20px}
+
+/* nút Tạo sự kiện: viền trắng, nền trong suốt, bo tròn lớn */
+.btn-outline{
+  background:transparent; color:#fff;
+  border:1.5px solid rgba(255,255,255,.85);
+  height:36px; padding:6px 16px; border-radius:999px; cursor:pointer; font-weight:600;
+}
+.btn-outline:hover{background:rgba(255,255,255,.12)}
+
+/* Vé của tôi: có icon vé nhỏ trước chữ */
+.nav-ticket{
+  display:flex; align-items:center; gap:8px;
+  color:#fff; text-decoration:none; opacity:.95;
+}
+.nav-ticket:hover{opacity:1}
+.ico-ticket{display:inline-flex; width:18px; height:18px}
+
+/* Đăng nhập | Đăng ký: dạng text links với dấu | */
+.auth a{
+  color:#fff; text-decoration:none; opacity:.95;
+}
+.auth a:hover{opacity:1}
+.auth .sep{margin:0 10px; opacity:.8}
+
+
+
+/* dải chuyên mục */
+.catbar{background:#121212; border-top:1px solid #0a0a0a; border-bottom:1px solid #0a0a0a}
+.cats{display:flex; gap:28px; height:44px; align-items:center; color:#dfdfdf; overflow:auto}
+.cats a{color:#dfdfdf; text-decoration:none; white-space:nowrap}
+.cats a:hover{color:#fff}
+
+
+/* Category bar */
+.catbar{background:#131313; border-top:1px solid #000; border-bottom:1px solid #000}
+.catbar .cats{display:flex; gap:24px; height:44px; align-items:center; color:#ddd; overflow:auto}
+.catbar .cats a{color:#ddd; text-decoration:none; white-space:nowrap}
+.catbar .cats a:hover{color:white}
+
+/* Hero */
+.hero{position:relative; height:340px; border-radius:12px; overflow:hidden; background:#000}
+.hero img{width:100%; height:100%; object-fit:cover; display:block; opacity:.85}
+.hero .overlay{
+  position:absolute; inset:0; display:flex; align-items:flex-end;
+  background:linear-gradient(0deg, rgba(0,0,0,.65), rgba(0,0,0,0) 60%);
+}
+.hero .content{padding:24px; color:#fff}
+.hero .title{font-size:28px; font-weight:800; letter-spacing:.5px}
+.hero .subtitle{opacity:.85; margin-top:6px}
+.hero .cta{margin-top:12px}
+.hero .cta button{
+  background:var(--primary); color:#fff; border:none; padding:10px 16px; border-radius:8px; cursor:pointer;
+}
+.hero .nav{
+  position:absolute; inset:0; display:flex; justify-content:space-between; align-items:center; padding:0 8px;
+}
+.hero .arrow{
+  width:40px; height:40px; border-radius:999px; border:none; cursor:pointer;
+  background:rgba(255,255,255,.85); font-size:20px;
+}
+
+/* Section rows */
+.section{margin:28px 0}
+.section h3{margin:12px 0 16px; font-size:20px}
+.row{
+  position:relative; display:flex; align-items:center;
+}
+.scroller{
+  display:flex; gap:14px; overflow:auto; scroll-behavior:smooth; padding-bottom:8px;
+}
+.row .ctrl{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:36px; height:36px; border-radius:999px; border:none; cursor:pointer;
+  background:#fff; color:#000; opacity:.9;
+}
+.row .left{left:-12px}
+.row .right{right:-12px}
+
+/* Card */
+.card{
+  min-width:180px; max-width:180px; background:var(--card); border:1px solid var(--border);
+  border-radius:10px; overflow:hidden;
+}
+.card img{width:100%; height:240px; object-fit:cover; display:block}
+.card .info{padding:10px}
+.card .name{font-weight:700}
+.card .meta{color:var(--muted); font-size:12px; margin-top:4px}
+
+/* Footer */
+.footer{margin-top:48px; background:#121212; color:#cfcfcf; border-top:1px solid #000}
+.footer .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:20px; padding:24px 0}
+.footer a{color:#cfcfcf; text-decoration:none}
+.footer small{display:block; padding: 16px 0; color:#9a9a9a; border-top:1px solid #1e1e1e}
+@media (max-width:900px){
+  .footer .grid{grid-template-columns:1fr 1fr}
+}
+
+/* ===== Trang đăng nhập ===== */
+.login-page {
+  background: #121212;
+  color: #fff;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 80px; /* Add this line to give space for the navbar */
+}
+
+/* Ensure the login container stays centered */
+.login-container {
+  position: relative;
+  top: 0;
+  margin-top: 0;
+}
+
+.login-form {
+  background: #2a2a2a;
+  padding: 40px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-form h2 {
+  margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #333;
+  color: #fff;
+  font-size: 14px;
+}
+
+.forgot-password {
+  text-align: right;
+}
+
+.forgot-password a {
+  color: #00b36b;
+  text-decoration: none;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
+.btn-primary {
+  background: #00b36b;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  width: 100%;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.signup-link {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.signup-link a {
+  color: #00b36b;
+  text-decoration: none;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}

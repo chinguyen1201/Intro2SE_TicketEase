@@ -1,2 +1,19 @@
-.vs
-Debug
+# VS/Windows
+.vs/
+Debug/
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Node / React
+node_modules/
+dist/
+.vite/
+*.log
+
+# Python / Flask
+.venv/
+__pycache__/
+instance/
+*.pyc
