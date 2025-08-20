@@ -8,7 +8,7 @@ export default function Navbar(){
     <header className="navbar">
       <div className="bar">
         <div className="container">
-          <div className="brand">TicketEase</div>
+          <Link to="/" className="brand">TicketEase</Link>
           <div className="search">
             <div className="search-field">
               <span className="search-ico" aria-hidden><FiSearch size={18}/></span>
