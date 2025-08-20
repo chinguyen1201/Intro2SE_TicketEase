@@ -31,7 +31,7 @@ function App() {
           <Route 
             path="/event/ticketselection" 
             element={
-              <ProtectedRoute requiredRole={["customer", "organizer"]}>
+              <ProtectedRoute requiredRole={["customer", "user", "organizer"]}>
                 <TicketSelection />
               </ProtectedRoute>
             } 
@@ -39,7 +39,7 @@ function App() {
           <Route 
             path="/event/ordersummary" 
             element={
-              <ProtectedRoute requiredRole={["customer", "organizer"]}>
+              <ProtectedRoute requiredRole={["customer", "user", "organizer"]}>
                 <OrderSummary />
               </ProtectedRoute>
             } 
@@ -47,7 +47,7 @@ function App() {
           <Route 
             path="/event/payment" 
             element={
-              <ProtectedRoute requiredRole={["customer", "organizer"]}>
+              <ProtectedRoute requiredRole={["customer", "user", "organizer"]}>
                 <Payment />
               </ProtectedRoute>
             } 
@@ -55,7 +55,7 @@ function App() {
           <Route 
             path="/purchasehistory" 
             element={
-              <ProtectedRoute requiredRole={["customer", "organizer"]}>
+              <ProtectedRoute requiredRole={["customer", "user", "organizer"]}>
                 <PurchaseHistory />
               </ProtectedRoute>
             } 
@@ -65,7 +65,7 @@ function App() {
           <Route 
             path="/createevent" 
             element={
-              <ProtectedRoute requiredRole={["customer", "organizer"]}>
+              <ProtectedRoute requiredRole={["customer", "user", "organizer"]}>
                 <CreateEvent />
               </ProtectedRoute>
             } 
@@ -73,7 +73,7 @@ function App() {
           <Route 
             path="/eventlist" 
             element={
-              <ProtectedRoute requiredRole={["customer", "organizer"]}>
+              <ProtectedRoute requiredRole={["customer", "user", "organizer"]}>
                 <EventList />
               </ProtectedRoute>
             } 

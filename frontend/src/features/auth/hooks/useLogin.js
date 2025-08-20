@@ -14,13 +14,24 @@ export default function useLogin() {
     setLoading(true);
     setError(null);
     try {
-      // credentials: { email &/or phone, password }
+      // credentials: { username, password }
       const data = await loginAPI(credentials);
 
-      // Lưu token/user nếu backend trả về
-      const token = data.token || data.accessToken;
-      if (token) localStorage.setItem("token", token);
-      if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
+      // Lưu token và thông tin user từ API response
+      // Response format: { access_token, token_type, user_id, user_role }
+      if (data.access_token) {
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("tokenType", data.token_type || "bearer");
+        localStorage.setItem("userId", data.user_id);
+        localStorage.setItem("userRole", data.user_role);
+        
+        // Tạo user object để tương thích với code cũ
+        const user = {
+          id: data.user_id,
+          role: data.user_role
+        };
+        localStorage.setItem("user", JSON.stringify(user));
+      }
 
       return data; // để caller điều hướng
     } catch (e) {
@@ -34,6 +45,9 @@ export default function useLogin() {
 
   const logout = useCallback(() => {
     localStorage.removeItem("token");
+    localStorage.removeItem("tokenType");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userRole");
     localStorage.removeItem("user");
   }, []);
 

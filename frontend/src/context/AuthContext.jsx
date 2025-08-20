@@ -15,19 +15,35 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [logoutSuccess, setLogoutSuccess] = useState(false);
 
   // Check for existing auth data on mount
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
+    const storedUserId = localStorage.getItem('userId');
+    const storedUserRole = localStorage.getItem('userRole');
     
-    if (storedToken && storedUser) {
+    if (storedToken && (storedUser || (storedUserId && storedUserRole))) {
       try {
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        
+        // Use stored user object or create from individual fields
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        } else if (storedUserId && storedUserRole) {
+          setUser({
+            id: storedUserId,
+            role: storedUserRole
+          });
+        }
       } catch (error) {
         console.error('Error parsing stored user data:', error);
+        // Clear all auth data if parsing fails
         localStorage.removeItem('token');
+        localStorage.removeItem('tokenType');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userRole');
         localStorage.removeItem('user');
       }
     }
@@ -35,23 +51,40 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData, authToken, navigationInfo = null) => {
+    console.log('AuthContext login called with:', { userData, authToken });
     setUser(userData);
     setToken(authToken);
     localStorage.setItem('token', authToken);
     localStorage.setItem('user', JSON.stringify(userData));
     
+    // Also store individual user fields for consistency
+    if (userData.id) localStorage.setItem('userId', userData.id);
+    if (userData.role) localStorage.setItem('userRole', userData.role);
+    
     // Store navigation info if provided
     if (navigationInfo) {
       localStorage.setItem('navigation', JSON.stringify(navigationInfo));
     }
+    
+    // Clear any logout success state
+    setLogoutSuccess(false);
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('tokenType');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
     localStorage.removeItem('user');
     localStorage.removeItem('navigation');
+    
+    // Show logout success message
+    setLogoutSuccess(true);
+    
+    // Hide logout success message after 3 seconds
+    setTimeout(() => setLogoutSuccess(false), 3000);
     
     console.log('User logged out successfully');
   };
@@ -61,7 +94,7 @@ export const AuthProvider = ({ children }) => {
   // Helper functions for role checking
   const isAdmin = () => user?.role === 'admin';
   const isOrganizer = () => user?.role === 'organizer';
-  const isCustomer = () => user?.role === 'customer';
+  const isCustomer = () => user?.role === 'user' || user?.role === 'customer'; // Support both 'user' and 'customer'
   
   // Get user's default redirect path
   const getDefaultRedirect = () => {
@@ -100,6 +133,7 @@ export const AuthProvider = ({ children }) => {
     token,
     isLoading,
     isAuthenticated,
+    logoutSuccess,
     login,
     logout,
     isAdmin,

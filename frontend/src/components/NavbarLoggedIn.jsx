@@ -13,6 +13,12 @@ export default function NavbarLoggedIn(){
   const { logout, user, isAdmin, isOrganizer, isCustomer } = useAuth();
   const navigate = useNavigate();
   
+  // Debug: Log user info
+  console.log('NavbarLoggedIn - User:', user);
+  console.log('NavbarLoggedIn - isAdmin:', isAdmin());
+  console.log('NavbarLoggedIn - isOrganizer:', isOrganizer());
+  console.log('NavbarLoggedIn - isCustomer:', isCustomer());
+  
   const toggleDropdown = () => setDropdownOpen(v => !v);
 
   const handleLogout = () => {
