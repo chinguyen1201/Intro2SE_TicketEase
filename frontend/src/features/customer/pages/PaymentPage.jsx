@@ -22,7 +22,7 @@ export default function PaymentPage() {
   const data = { ...FALLBACK, ...(state?.payment ?? {}) };
 
   const [secondsLeft, setSecondsLeft] = useState(10 * 60); // 10:00 countdown
-  const [showSuccess, setShowSuccess] = useState(false);    // <- NEW: popup state
+  const [showSuccess, setShowSuccess] = useState(false);    
 
   useEffect(() => {
     const id = setInterval(() => {

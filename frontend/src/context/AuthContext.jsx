@@ -1,5 +1,5 @@
 // frontend/src/context/AuthContext.jsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext();
 
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const login = (userData, authToken, navigationInfo = null) => {
+  const login = useCallback((userData, authToken, navigationInfo = null) => {
     console.log('AuthContext login called with:', { userData, authToken });
     setUser(userData);
     setToken(authToken);
@@ -68,11 +68,14 @@ export const AuthProvider = ({ children }) => {
     
     // Clear any logout success state
     setLogoutSuccess(false);
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
+    // Clear state first
     setUser(null);
     setToken(null);
+    
+    // Then clear localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('tokenType');
     localStorage.removeItem('userId');
@@ -85,16 +88,14 @@ export const AuthProvider = ({ children }) => {
     
     // Hide logout success message after 3 seconds
     setTimeout(() => setLogoutSuccess(false), 3000);
-    
-    console.log('User logged out successfully');
-  };
+  }, []);
 
   const isAuthenticated = !!user && !!token;
 
   // Helper functions for role checking
-  const isAdmin = () => user?.role === 'admin';
-  const isOrganizer = () => user?.role === 'organizer';
-  const isCustomer = () => user?.role === 'user' || user?.role === 'customer'; // Support both 'user' and 'customer'
+  const isAdmin = useCallback(() => user?.role === 'admin', [user?.role]);
+  const isOrganizer = useCallback(() => user?.role === 'organizer', [user?.role]);
+  const isCustomer = useCallback(() => user?.role === 'user' || user?.role === 'customer', [user?.role]); // Support both 'user' and 'customer'
   
   // Get user's default redirect path
   const getDefaultRedirect = () => {

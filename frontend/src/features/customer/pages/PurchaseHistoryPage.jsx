@@ -41,7 +41,7 @@ export default function PurchaseHistoryPage() {
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
 
-  // Only for the demo UI; you can replace this with real pagination from API
+  // Only for the demo UI; replace this with real pagination from API
   const pageSize = 2; // show 2 cards per page like the mock
   const totalPages = 68;
 

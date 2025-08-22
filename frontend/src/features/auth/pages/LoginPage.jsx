@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import Header from '../../../components/Header';
-import { login as loginAPI, loginWithPayload } from '../services/authService'; // gọi API
+
 
 export default function Login() {
   const navigate = useNavigate();
@@ -16,57 +16,14 @@ export default function Login() {
   const onChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setErrorMsg('');
-
+    setErrorMsg("");
     if (!form.id.trim() || !form.password) {
-      setErrorMsg('Vui lòng nhập đầy đủ Username/Email/SĐT và mật khẩu');
+      setErrorMsg("Vui lòng nhập đầy đủ Username/Email/SĐT và mật khẩu");
       return;
     }
-
-    setLoading(true);
-    try {
-      // Call the API with username and password as query parameters
-      const data = await loginAPI(form.id.trim(), form.password);
-      
-      console.log('Login API response:', data);
-
-      // Expected response format:
-      // {
-      //   "access_token": "...",
-      //   "token_type": "bearer", 
-      //   "user_id": 1,
-      //   "user_role": "user"
-      // }
-
-      if (data.access_token && data.user_id) {
-        // Create user object for context
-        const user = {
-          id: data.user_id,
-          role: data.user_role || 'user',
-          username: form.id.trim() // Store the username used for login
-        };
-
-        console.log('Login - User object created:', user);
-        console.log('Login - API response:', data);
-
-        // Use auth context to handle login
-        loginContext(user, data.access_token);
-        
-        console.log(`Login successful for ${data.user_role} user`);
-        
-        // Always redirect to homepage to show logged-in navbar
-        navigate('/', { replace: true });
-      } else {
-        setErrorMsg('Dữ liệu đăng nhập không hợp lệ');
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      setErrorMsg(err?.message || 'Đăng nhập thất bại');
-    } finally {
-      setLoading(false);
-    }
+    
   };
 
   return (
@@ -127,6 +84,26 @@ export default function Login() {
                 </details>
               </div>
             )}
+            {/* Fake login */}
+            {/* Add this simple fake login button below the form */}
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ marginTop: 16 }}
+              onClick={() => {
+                // Simulate a successful login
+                const fakeUser = { id: 1, role: 'user', username: 'fakelogin' };
+                localStorage.setItem('token', 'fake_token');
+                localStorage.setItem('user', JSON.stringify(fakeUser));
+                localStorage.setItem('userId', '1');
+                localStorage.setItem('userRole', 'user');
+                // Optionally, update context if needed
+                window.location.href = '/'; // Redirect to homepage
+              }}
+            >
+              Fake Login (Dev Only)
+            </button> 
+            {/* Fake login */}
           </div>
         </div>
       </div>

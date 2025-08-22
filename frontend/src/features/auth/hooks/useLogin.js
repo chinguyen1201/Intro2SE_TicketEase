@@ -1,6 +1,6 @@
 // frontend/src/features/auth/hooks/useLogin.js
 import { useState, useCallback } from "react";
-import { login as loginAPI } from "../services/authService";
+import { loginWithCredentials as loginAPI } from "../services/authService";
 
 /**
  * Hook đăng nhập dùng lại được cho nhiều màn hình
@@ -15,10 +15,12 @@ export default function useLogin() {
     setError(null);
     try {
       // credentials: { username, password }
+      // The loginAPI function now expects credentials object and handles token creation internally
       const data = await loginAPI(credentials);
 
       // Lưu token và thông tin user từ API response
       // Response format: { access_token, token_type, user_id, user_role }
+      // Token is only created after successful login, not passed in
       if (data.access_token) {
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("tokenType", data.token_type || "bearer");

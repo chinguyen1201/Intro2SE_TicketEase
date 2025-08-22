@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import Header from '../../../components/Header';
-import { signup as signupAPI } from '../services/authService'; // gọi API
+
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ export default function SignupPage() {
     return '';
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const v = validate();
     if (v) {
@@ -45,30 +45,32 @@ export default function SignupPage() {
     }
     setErrorMsg('');
     setLoading(true);
-    try {
-      const data = await signupAPI({
+    setTimeout(() => {
+      // Simulate saving user to localStorage
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      // Check if email already exists
+      if (users.some(u => u.email === form.email)) {
+        setErrorMsg('Email đã được đăng ký');
+        setLoading(false);
+        return;
+      }
+      const newUser = {
+        id: Date.now(),
         name: form.fullName,
         email: form.email,
         password: form.password,
         phone: form.phone || null,
         gender: form.gender || null,
         dob: form.dob || null,
-      });
-      
-      // Auto-login after successful signup
-      const token = data.token || data.accessToken;
-      if (token && data.user) {
-        loginContext(data.user, token);
-        navigate('/', { replace: true }); // Go directly to homepage with logged in status
-      } else {
-        // Fallback: if no token, redirect to login page
-        navigate('/login', { state: { signedUp: true } });
-      }
-    } catch (err) {
-      setErrorMsg(err?.message || 'Đăng ký thất bại');
-    } finally {
+        role: 'customer', // Default role for demo
+      };
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+      // Auto-login after signup
+      loginContext(newUser, 'demo-token');
+      navigate('/', { replace: true });
       setLoading(false);
-    }
+    }, 800);
   };
 
   return (

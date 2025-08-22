@@ -5,16 +5,11 @@ import NavbarLoggedIn from "../../../components/NavbarLoggedIn";
 import { RiTicket2Line } from "react-icons/ri";
 import { TbPlus, TbTag, TbTrash } from "react-icons/tb";
 import { RxCross2 } from "react-icons/rx";
-import { createEvent } from "../services/eventService";
+
 
 export default function CreateEventPage() {
   const [step, setStep] = useState(1);
-  const [showSubmitted, setShowSubmitted] = useState(false);
-  const [showDraftSaved, setShowDraftSaved] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
   const navigate = useNavigate();
-
   // ---------- Step 1: Basic Info ----------
   const [basic, setBasic] = useState({
     posterFile: null,
@@ -60,76 +55,46 @@ export default function CreateEventPage() {
     taxCode: "",
   });
 
+  const [showSubmitted, setShowSubmitted] = useState(false);
+
   const next = () => setStep((s) => Math.min(3, s + 1));
   const back = () => setStep((s) => Math.max(1, s - 1));
 
-  const handleSubmit = async (isDraft = false) => {
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    try {
-      if (isDraft) {
-        // Minimal validation for drafts - only require title
-        if (!basic.title) {
-          throw new Error('Please enter an event title to save as draft');
-        }
-      } else {
-        // Full validation for submission
-        if (!basic.title || !basic.description || !basic.date || !basic.time || !basic.category) {
-          throw new Error('Please fill in all required basic information fields');
-        }
-
-        // Validate event mode selection
-        if (!basic.modeOnline && !basic.modeOffline) {
-          throw new Error('Please select at least one event mode (Online or Offline)');
-        }
-
-        // Validate location fields only if offline mode is selected
-        if (basic.modeOffline && (!basic.venueName || !basic.province || !basic.district || !basic.address)) {
-          throw new Error('Please fill in location information for offline events');
-        }
-
-        if (!basic.orgName || !basic.orgInfo) {
-          throw new Error('Please fill in organizer information');
-        }
-
-        if (!tickets.length || tickets.some(t => !t.name || !t.price || !t.quantity)) {
-          throw new Error('Please add at least one valid ticket type');
-        }
-      }
-
-      // Prepare event data
-      const eventData = {
-        ...basic,
-        tickets: tickets.map(t => ({
-          name: t.name,
-          price: t.price,
-          desc: t.desc || '',
-          quantity: t.quantity,
-          start: t.start,
-          end: t.end
-        })),
-        ...payout
-      };
-
-      // Submit to API
-      const result = await createEvent(eventData, isDraft);
-      console.log('Event created successfully:', result);
-      
-      if (isDraft) {
-        // Show different success message for draft
-        setShowDraftSaved(true);
-      } else {
-        setShowSubmitted(true);
-      }
-      
-    } catch (error) {
-      console.error('Error creating event:', error);
-      setSubmitError(error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
+  // Add a local handleSubmit that just shows the overlay
+  const handleSubmit = () => {
+    setShowSubmitted(true);
   };
+  // Add a handler for saving draft
+  const handleSaveDraft = () => {
+    // Validate required fields for draft (e.g., title, description, date, time, category)
+    if (!basic.title || !basic.description || !basic.date || !basic.time || !basic.category) {
+      alert('Vui lòng điền đầy đủ thông tin bắt buộc để lưu nháp.');
+      return;
+    }
+    // Build draft event object
+    const draftEvent = {
+      id: Date.now().toString(),
+      title: basic.title,
+      description: basic.description,
+      date: basic.date,
+      time: basic.time,
+      category: basic.category,
+      venue: basic.venueName,
+      address: `${basic.address}, ${basic.ward}, ${basic.district}, ${basic.province}`,
+      status: 'draft',
+      tickets,
+      payout,
+      img: basic.posterPreview || '',
+      originalStatus: 'draft',
+    };
+    // Save to localStorage (append to existing drafts)
+    const drafts = JSON.parse(localStorage.getItem('draftEvents') || '[]');
+    drafts.push(draftEvent);
+    localStorage.setItem('draftEvents', JSON.stringify(drafts));
+    // Navigate to event list page
+    navigate('/eventlist');
+  };
+
 
   return (
     <>
@@ -143,49 +108,39 @@ export default function CreateEventPage() {
             <span className="font-medium">Tạo sự kiện mới</span>
           </div>
         </div>
-
         <div className="max-w-5xl mx-auto px-6 py-8">
           <Stepper step={step} setStep={setStep} />
-
           {step === 1 && (
             <StepBasic 
               basic={basic} 
               setBasic={setBasic} 
               onNext={next} 
-              handleSubmit={handleSubmit}
-              isSubmitting={isSubmitting}
+              onSaveDraft={handleSaveDraft} // <-- pass handler
             />
           )}
-
           {step === 2 && (
             <StepTickets
               tickets={tickets}
               setTickets={setTickets}
               onNext={next}
               onBack={back}
-              handleSubmit={handleSubmit}
-              isSubmitting={isSubmitting}
               basic={basic}
+              onSaveDraft={handleSaveDraft} // <-- pass handler
             />
           )}
-
           {step === 3 && (
             <StepPayout
               payout={payout}
               setPayout={setPayout}
               onBack={back}
-              onSubmit={handleSubmit}
               handleSubmit={handleSubmit}
-              isSubmitting={isSubmitting}
-              submitError={submitError}
+              onSaveDraft={handleSaveDraft} // <-- pass handler
             />
           )}
         </div>
       </div>
-
       {/* Success overlays */}
       {showSubmitted && <SubmittedOverlay onClose={() => setShowSubmitted(false)} />}
-      {showDraftSaved && <DraftSavedOverlay onClose={() => setShowDraftSaved(false)} />}
     </>
   );
 }
@@ -220,7 +175,7 @@ function Stepper({ step, setStep }) {
 }
 
 /* -------- Step 1: Basic information -------- */
-function StepBasic({ basic, setBasic, onNext, handleSubmit, isSubmitting }) {
+function StepBasic({ basic, setBasic, onNext, onSaveDraft }) {
   const posterInput = useRef(null);
   const orgLogoInput = useRef(null);
 
@@ -473,18 +428,10 @@ function StepBasic({ basic, setBasic, onNext, handleSubmit, isSubmitting }) {
       {/* Next */}
       <div className="mt-6 flex justify-between">
         <button
-          onClick={() => handleSubmit(true)}
-          disabled={isSubmitting || !basic.title.trim()}
-          className="px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-md font-semibold text-white flex items-center gap-2"
+          onClick={onSaveDraft}
+          className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-md font-semibold text-white"
         >
-          {isSubmitting ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Đang lưu...
-            </>
-          ) : (
-            'Lưu nháp'
-          )}
+          Lưu nháp
         </button>
         <button
           onClick={onNext}
@@ -498,7 +445,7 @@ function StepBasic({ basic, setBasic, onNext, handleSubmit, isSubmitting }) {
 }
 
 /* -------- Step 2: Tickets -------- */
-function StepTickets({ tickets, setTickets, onNext, onBack, handleSubmit, isSubmitting, basic }) {
+function StepTickets({ tickets, setTickets, onNext, onBack, basic, onSaveDraft }) {
   const addTicket = () =>
     setTickets((t) => [
       ...t,
@@ -635,18 +582,10 @@ function StepTickets({ tickets, setTickets, onNext, onBack, handleSubmit, isSubm
             Quay lại
           </button>
           <button
-            onClick={() => handleSubmit(true)}
-            disabled={isSubmitting || !basic.title.trim()}
-            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-md font-semibold text-white flex items-center gap-2"
+            onClick={onSaveDraft}
+            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-md font-semibold text-white"
           >
-            {isSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Đang lưu...
-              </>
-            ) : (
-              'Lưu nháp'
-            )}
+            Lưu nháp
           </button>
         </div>
         <button onClick={onNext} className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-md font-semibold">
@@ -658,7 +597,7 @@ function StepTickets({ tickets, setTickets, onNext, onBack, handleSubmit, isSubm
 }
 
 /* -------- Step 3: Payout -------- */
-function StepPayout({ payout, setPayout, onBack, onSubmit, handleSubmit, isSubmitting, submitError }) {
+function StepPayout({ payout, setPayout, onBack, handleSubmit, onSaveDraft }) {
   const input = (props) => (
     <input
       {...props}
@@ -668,12 +607,6 @@ function StepPayout({ payout, setPayout, onBack, onSubmit, handleSubmit, isSubmi
 
   return (
     <>
-      {submitError && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded-md text-red-700">
-          <strong>Error:</strong> {submitError}
-        </div>
-      )}
-
       <div className="max-w-3xl mx-auto bg-black rounded-2xl p-6 border border-white/10">
         <div className="text-white/90 mb-4">
           TicketEase sẽ chuyển tiền bán vé đến tài khoản ngân hàng của bạn.
@@ -748,38 +681,21 @@ function StepPayout({ payout, setPayout, onBack, onSubmit, handleSubmit, isSubmi
           <button 
             onClick={onBack} 
             className="px-4 py-2 rounded-md bg-white/10 hover:bg-white/20"
-            disabled={isSubmitting}
           >
             Quay lại
           </button>
           <button
-            onClick={() => handleSubmit(true)}
-            disabled={isSubmitting}
-            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-md font-semibold text-white flex items-center gap-2"
+            onClick={onSaveDraft}
+            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-md font-semibold text-white"
           >
-            {isSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Đang lưu...
-              </>
-            ) : (
-              'Lưu nháp'
-            )}
+            Lưu nháp
           </button>
         </div>
         <button
-          onClick={() => handleSubmit(false)}
-          disabled={isSubmitting}
-          className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-500 disabled:cursor-not-allowed rounded-md font-semibold flex items-center gap-2"
+          onClick={handleSubmit}
+          className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-md font-semibold flex items-center gap-2"
         >
-          {isSubmitting ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Đang gửi...
-            </>
-          ) : (
-            'Gửi để duyệt'
-          )}
+          Gửi để duyệt
         </button>
       </div>
     </>

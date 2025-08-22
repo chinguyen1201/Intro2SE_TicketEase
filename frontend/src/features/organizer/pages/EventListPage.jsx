@@ -4,46 +4,9 @@ import { useNavigate } from "react-router-dom";
 import NavbarLoggedIn from "../../../components/NavbarLoggedIn";
 import { FiSearch, FiClock, FiMapPin, FiMoreVertical, FiEye } from "react-icons/fi";
 import { TbEdit, TbChartBar, TbTrash } from "react-icons/tb";
-import { getEvents } from "../services/eventService";
 
-const MOCK = [
-  {
-    id: "draft-event",
-    title: "DRAFT EVENT EXAMPLE",
-    time: "20:00, 25 tháng 8, 2025",
-    venue: "Draft Venue",
-    img: "https://picsum.photos/seed/draft/160/120",
-    status: "draft",
-    originalStatus: "draft",
-  },
-  {
-    id: "pending-event", 
-    title: "PENDING EVENT EXAMPLE",
-    time: "18:00, 26 tháng 8, 2025",
-    venue: "Pending Venue",
-    img: "https://picsum.photos/seed/pending/160/120",
-    status: "pending",
-    originalStatus: "pending",
-  },
-  {
-    id: "upcoming-event",
-    title: "UPCOMING EVENT EXAMPLE", 
-    time: "19:00, 27 tháng 8, 2025",
-    venue: "Upcoming Venue",
-    img: "https://picsum.photos/seed/upcoming/160/120",
-    status: "upcoming",
-    originalStatus: "approved",
-  },
-  {
-    id: "past-event",
-    title: "PAST EVENT EXAMPLE",
-    time: "17:30, 7 tháng 8, 2025",
-    venue: "Past Venue",
-    img: "https://picsum.photos/seed/past/160/120", 
-    status: "past",
-    originalStatus: "approved",
-  },
-];
+
+
 
 const FILTERS = [
   { key: "all", label: "Tất cả" },
@@ -62,75 +25,6 @@ export default function EventListPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const menuRef = useRef(null);
-
-  // Fetch events from API
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        const eventsData = await getEvents();
-        // Transform API data to match component expectations
-        const transformedEvents = eventsData.map(event => ({
-          id: event.id.toString(),
-          title: event.title,
-          time: event.time && event.date ? `${event.time}, ${formatDate(event.date)}` : "TBD",
-          venue: event.venue || "TBD",
-          address: event.address || "",
-          img: event.image || "https://picsum.photos/seed/default/160/120",
-          status: mapStatus(event.status, event.date),
-          originalStatus: event.status,
-          mode: event.mode || { online: false, offline: true }
-        }));
-        setEvents(transformedEvents);
-      } catch (error) {
-        console.error('Failed to fetch events:', error);
-        // Fallback to mock data on error - already has proper status structure
-        setEvents(MOCK);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
-  }, []);
-
-  // Helper function to format date
-  const formatDate = (dateStr) => {
-    try {
-      const date = new Date(dateStr);
-      const day = date.getDate();
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
-      return `${day} tháng ${month}, ${year}`;
-    } catch {
-      return "TBD";
-    }
-  };
-
-  // Helper function to map backend status to frontend status
-  const mapStatus = (backendStatus, eventDate) => {
-    // Check if event date has passed
-    const isEventPast = eventDate && new Date(eventDate) < new Date();
-    
-    const statusMap = {
-      'draft': 'draft',
-      'pending': 'pending', 
-      'approved': isEventPast ? 'past' : 'upcoming',
-      'rejected': 'past',
-      'published': isEventPast ? 'past' : 'upcoming'
-    };
-    return statusMap[backendStatus] || 'all';
-  };
-
-  const list = useMemo(() => {
-    let items = events;
-    if (filter !== "all") items = items.filter((e) => e.status === filter);
-    if (q.trim()) {
-      const k = q.toLowerCase();
-      items = items.filter((e) => e.title.toLowerCase().includes(k));
-    }
-    return items;
-  }, [q, filter, events]);
 
   return (
     <>
