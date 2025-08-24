@@ -11,7 +11,7 @@ class Category(SQLModel, table=True):
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
-    id: Optional[int] = Field(default=1, primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
     username: str = Field(max_length=50, unique=True)
     email: Optional[str] = Field(default=None, max_length=100)
     password: str = Field(max_length=255)
@@ -92,6 +92,8 @@ class Order(SQLModel, table=True):
     payment_method_id: int = Field(default=None, foreign_key="payment_method.id")
     total_amount: float = Field(default=0.0)
     status: str = Field(max_length=20)  # Status of the order (e.g., pending, completed)
+    created_at: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    updated_at: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 class JWT(SQLModel, table=True):
     __tablename__ = "jwt_tokens"  # Tên bảng tùy chỉnh

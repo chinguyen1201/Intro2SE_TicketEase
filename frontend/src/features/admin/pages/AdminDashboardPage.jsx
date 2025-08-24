@@ -1,9 +1,7 @@
 // frontend/src/features/admin/pages/AdminDashboardPage.jsx
 import React, { useState } from "react";
-// import NavbarAdmin from "../../../components/NavbarAdmin";          // ✅ correct file name/case
-// import ReviewEventPanel from "ReviewEventPanel";   // ✅ correct path
-
-import ReviewEventPanel from "./ReviewEventPanel"; 
+import { Link } from "react-router-dom";
+import ReviewEventPanel from "./ReviewEventPanel";
 import NavbarAdmin from "../../../components/NavBarAdmin";
 
 import {
@@ -43,105 +41,114 @@ export default function AdminDashboardPage() {
 
   const eventActive = section.startsWith("event/");
 
-return (
+  return (
     <div className="min-h-screen bg-[#f6f7f8] text-gray-900">
-        <NavbarAdmin />
+      <NavbarAdmin />
 
-        <div className="flex w-full max-w-none">
-            <aside className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
-                <div className="px-4 py-4 flex items-center gap-2 text-gray-700">
-                    <FiGrid />
-                    <span className="font-medium">Main menu</span>
+      <div className="flex w-full max-w-none">
+        <aside className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+          <div className="px-4 py-4 flex items-center gap-2 text-gray-700">
+            <FiGrid />
+            <span className="font-medium">Main menu</span>
+          </div>
+
+          <nav className="py-2">
+            <SideItem
+              icon={<FiHome />}
+              label="Dashboard"
+              active={section === "dashboard"}
+              onClick={() => setSection("dashboard")}
+            />
+
+            <SideItem
+              icon={<FiCalendar />}
+              label="Event"
+              active={eventActive}
+              onClick={() => setSection("event/review")}
+            />
+            <SubItem
+              label="Review events"
+              active={section === "event/review"}
+              onClick={() => setSection("event/review")}
+            />
+            <SubItem
+              label="View report events"
+              active={section === "event/reports"}
+              onClick={() => setSection("event/reports")}
+            />
+
+            <SideItem icon={<FiUsers />} label="Customer" />
+            <SideItem icon={<FiSettings />} label="Settings" />
+          </nav>
+        </aside>
+
+        {/* Content */}
+        <main className="flex-1 min-w-0">
+          {section === "dashboard" && (
+            <>
+              {/* Content header */}
+              <div className="px-6 py-4 border-b border-l border-r bg-white">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-extrabold tracking-wide">DASHBOARD</h1>
+                  <nav className="flex items-center space-x-2 text-sm text-gray-500">
+                    <Link to="/" className="hover:text-gray-700 transition-colors">Trang chủ</Link>
+                    <span>/</span>
+                    <Link to="/account" className="hover:text-gray-700 transition-colors">Tài khoản</Link>
+                    <span>/</span>
+                    <span className="text-gray-900">Admin Dashboard</span>
+                  </nav>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* KPI cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {kpi.map((c) => (
+                    <div
+                      key={c.id}
+                      className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center gap-3"
+                    >
+                      <div className="text-gray-600 text-xl">{c.icon}</div>
+                      <div>
+                        <div className="text-gray-500 text-sm">{c.label}</div>
+                        <div className="text-2xl font-extrabold mt-1">{c.value}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                <nav className="py-2">
-                    <SideItem
-                        icon={<FiHome />}
-                        label="Dashboard"
-                        active={section === "dashboard"}
-                        onClick={() => setSection("dashboard")}
-                    />
+                {/* Charts row */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Bar chart */}
+                  <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-4">
+                    <div className="font-semibold mb-3">Monthly Revenue</div>
+                    <BarChart data={bars} max={barMax} />
+                  </div>
 
-                    <SideItem
-                        icon={<FiCalendar />}
-                        label="Event"
-                        active={eventActive}
-                        onClick={() => setSection("event/review")}
-                    />
-                    <SubItem
-                        label="Review events"
-                        active={section === "event/review"}
-                        onClick={() => setSection("event/review")}
-                    />
-                    <SubItem
-                        label="View report events"
-                        active={section === "event/reports"}
-                        onClick={() => setSection("event/reports")}
-                    />
+                  {/* Pie chart */}
+                  <div className="bg-white border border-gray-200 rounded-xl p-4">
+                    <div className="font-semibold mb-3">Visitor Distribution</div>
+                    <PieChart data={pie} />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
 
-                    <SideItem icon={<FiUsers />} label="Customer" />
-                    <SideItem icon={<FiSettings />} label="Settings" />
-                </nav>
-            </aside>
+          {section === "event/review" && <ReviewEventPanel />}
 
-            {/* Content */}
-            <main className="flex-1 min-w-0">
-                {section === "dashboard" && (
-                    <>
-                        {/* Content header */}
-                        <div className="px-6 py-4 border-b border-l border-r bg-white">
-                            <h1 className="text-2xl font-extrabold tracking-wide">DASHBOARD</h1>
-                        </div>
-
-                        <div className="p-6 space-y-6">
-                            {/* KPI cards */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {kpi.map((c) => (
-                                    <div
-                                        key={c.id}
-                                        className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center gap-3"
-                                    >
-                                        <div className="text-gray-600 text-xl">{c.icon}</div>
-                                        <div>
-                                            <div className="text-gray-500 text-sm">{c.label}</div>
-                                            <div className="text-2xl font-extrabold mt-1">{c.value}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Charts row */}
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                {/* Bar chart */}
-                                <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-4">
-                                    <div className="font-semibold mb-3">Monthly Revenue</div>
-                                    <BarChart data={bars} max={barMax} />
-                                </div>
-
-                                {/* Pie chart */}
-                                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                                    <div className="font-semibold mb-3">Visitor Distribution</div>
-                                    <PieChart data={pie} />
-                                </div>
-                            </div>
-                        </div>
-                    </>
-                )}
-
-                {section === "event/review" && <ReviewEventPanel />}
-
-                {section === "event/reports" && (
-                    <div className="p-6">
-                        <div className="bg-white border border-gray-200 rounded-md p-6">
-                            <div className="text-lg font-semibold mb-1">View report events</div>
-                            <div className="text-gray-600">Coming soon…</div>
-                        </div>
-                    </div>
-                )}
-            </main>
-        </div>
+          {section === "event/reports" && (
+            <div className="p-6">
+              <div className="bg-white border border-gray-200 rounded-md p-6">
+                <div className="text-lg font-semibold mb-1">View report events</div>
+                <div className="text-gray-600">Coming soon…</div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
-);
+  );
 }
 
 /* ---------- Sidebar items ---------- */
@@ -149,9 +156,8 @@ function SideItem({ icon, label, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left flex items-center gap-3 px-5 py-3 pl-7 ${
-        active ? "bg-gray-100 font-medium text-gray-900" : "text-gray-700 hover:bg-gray-50"
-      }`}
+      className={`w-full text-left flex items-center gap-3 px-5 py-3 pl-7 ${active ? "bg-gray-100 font-medium text-gray-900" : "text-gray-700 hover:bg-gray-50"
+        }`}
     >
       <span className="text-lg">{icon}</span>
       <span>{label}</span>
@@ -163,9 +169,8 @@ function SubItem({ label, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left flex items-center gap-3 px-5 py-3 text-sm pl-10 ${
-        active ? "bg-gray-500 text-white font-medium" : "text-gray-700 hover:bg-gray-100"
-      }`}
+      className={`w-full text-left flex items-center gap-3 px-5 py-3 text-sm pl-10 ${active ? "bg-gray-500 text-white font-medium" : "text-gray-700 hover:bg-gray-100"
+        }`}
     >
       {label}
     </button>

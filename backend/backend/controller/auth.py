@@ -43,12 +43,7 @@ async def register(
         user.created_at = user.updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         user.status = "active"  # Set default status to active
         
-        last_user = (db.exec(
-            select(User).order_by(User.id.desc()).limit(1)
-        ).first())
-
-        last_user_id = last_user.id + 1 if last_user else 1
-        user.id = last_user_id
+    # Do not set user.id manually; let the database handle auto-increment
 
         if user.role not in ["user", "organizer", "admin"]:
             raise HTTPException(status_code=400, detail="Invalid role")
@@ -102,7 +97,17 @@ async def login(username: Annotated[str, Query()], password: Annotated[str, Quer
             "access_token": access_token,
             "token_type": "bearer",
             "user_id": user.id,
-            "user_role": user.role
+            "user_role": user.role,
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "role": user.role,
+                "email": user.email,
+                "full_name": getattr(user, 'full_name', None),
+                "phone_number": getattr(user, 'phone_number', None),
+                "status": getattr(user, 'status', None),
+                # add other fields as needed
+            }
         }
         
     except Exception as e:

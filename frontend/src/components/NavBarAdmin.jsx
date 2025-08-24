@@ -4,17 +4,19 @@ import { MdArrowDropDown } from 'react-icons/md';
 import { FaRegUser, FaRegCircleUser } from 'react-icons/fa6';
 import { LuLogOut } from 'react-icons/lu';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useDispatch } from 'react-redux';
+import { logout } from '../context/authSlides.jsx';
 
 export default function NavbarAdmin() {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const { logout } = useAuth();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const toggleDropdown = () => setDropdownOpen(v => !v);
 
   const handleLogout = () => {
-    logout();
+    dispatch(logout());
+    localStorage.clear();
     navigate('/', { replace: true });
   };
 

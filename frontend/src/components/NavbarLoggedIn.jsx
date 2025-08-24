@@ -6,31 +6,38 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { MdArrowDropDown, MdEvent, MdAdminPanelSettings } from "react-icons/md";
 import { FaRegUser, FaRegCircleUser, FaCrown } from "react-icons/fa6";
 import { LuLogOut } from "react-icons/lu";
-import { useAuth } from '../context/AuthContext';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../context/authSlides.jsx';
 
-export default function NavbarLoggedIn(){
+export default function NavbarLoggedIn() {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const { logout, user, isAdmin, isOrganizer, isCustomer } = useAuth();
+  const dispatch = useDispatch();
+  const { user, isAdmin } = useSelector(state => state.auth);
   const navigate = useNavigate();
-  
+
+  // Helper functions for role checking
+  const isOrganizer = user?.role === 'organizer';
+  const isCustomer = user?.role === 'user';
+
   const toggleDropdown = () => setDropdownOpen(v => !v);
 
   const handleLogout = () => {
-    logout();
+    dispatch(logout());
+    localStorage.clear();
     setDropdownOpen(false);
     navigate('/', { replace: true });
   };
 
   // Role-based styling
   const getRoleColor = () => {
-    if (isAdmin()) return 'text-red-600';
-    if (isOrganizer()) return 'text-blue-600';
+    if (isAdmin) return 'text-red-600';
+    if (isOrganizer) return 'text-blue-600';
     return 'text-gray-700';
   };
 
   const getRoleBadge = () => {
-    if (isAdmin()) return { icon: <FaCrown size={14} />, text: 'Admin', color: 'bg-red-100 text-red-800' };
-    if (isOrganizer()) return { icon: <MdEvent size={14} />, text: 'Organizer', color: 'bg-blue-100 text-blue-800' };
+    if (isAdmin) return { icon: <FaCrown size={14} />, text: 'Admin', color: 'bg-red-100 text-red-800' };
+    if (isOrganizer) return { icon: <MdEvent size={14} />, text: 'Organizer', color: 'bg-blue-100 text-blue-800' };
     return null;
   };
 
@@ -42,14 +49,14 @@ export default function NavbarLoggedIn(){
 
           <div className="search">
             <div className="search-field">
-              <span className="search-ico" aria-hidden><FiSearch size={18}/></span>
+              <span className="search-ico" aria-hidden><FiSearch size={18} /></span>
               <input placeholder="Bạn tìm gì hôm nay?" />
             </div>
           </div>
 
           <div className="nav-actions">
             {/* Role-based navigation buttons */}
-            {isAdmin() && (
+            {isAdmin && (
               <NavLink to="/admin/dashboard" className="btn-outline btn-cta">
                 <MdAdminPanelSettings size={18} style={{ marginRight: 4 }} />
                 Admin Panel
@@ -57,16 +64,16 @@ export default function NavbarLoggedIn(){
             )}
 
             {/* Event creation for customers and organizers (not admin) */}
-            {(isOrganizer() || isCustomer()) && (
+            {(isOrganizer || isCustomer) && (
               <NavLink to="/createevent" className="btn-outline btn-cta">
                 Tạo sự kiện
               </NavLink>
             )}
 
             {/* Customer-specific features */}
-            {(isCustomer() || isOrganizer()) && (
+            {(isCustomer || isOrganizer) && (
               <NavLink to="/purchasehistory" className="nav-ticket">
-                <span className="ico-ticket" aria-hidden><RiTicket2Line size={18}/></span>
+                <span className="ico-ticket" aria-hidden><RiTicket2Line size={18} /></span>
                 Vé của tôi
               </NavLink>
             )}
@@ -95,39 +102,39 @@ export default function NavbarLoggedIn(){
                   style={{ minWidth: '220px', width: 'max-content', right: 0, zIndex: 1000 }}
                 >
                   {/* Admin-specific menu items */}
-                  {isAdmin() && (
+                  {isAdmin && (
                     <>
                       <NavLink
                         to="/admin/dashboard"
                         onClick={() => setDropdownOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 border-b border-gray-200"
                       >
-                        <MdAdminPanelSettings size={18}/>
+                        <MdAdminPanelSettings size={18} />
                         Bảng điều khiển Admin
                       </NavLink>
                     </>
                   )}
 
                   {/* Organizer-specific menu items */}
-                  {(isOrganizer() || isCustomer()) && (
+                  {(isOrganizer || isCustomer) && (
                     <NavLink
                       to="/eventlist"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-200"
                     >
-                      <MdEvent size={18}/>
+                      <MdEvent size={18} />
                       Sự kiện của tôi
                     </NavLink>
                   )}
 
                   {/* Customer-specific menu items */}
-                  {(isCustomer() || isOrganizer()) && (
+                  {(isCustomer || isOrganizer) && (
                     <NavLink
                       to="/purchasehistory"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-200"
                     >
-                      <RiTicket2Line size={18}/>
+                      <RiTicket2Line size={18} />
                       Vé của tôi
                     </NavLink>
                   )}
@@ -138,7 +145,7 @@ export default function NavbarLoggedIn(){
                     onClick={() => setDropdownOpen(false)}
                     className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-200"
                   >
-                    <FaRegCircleUser size={18}/>
+                    <FaRegCircleUser size={18} />
                     Tài khoản của tôi
                   </NavLink>
 
@@ -146,7 +153,7 @@ export default function NavbarLoggedIn(){
                     onClick={handleLogout}
                     className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
-                    <LuLogOut size={18}/>
+                    <LuLogOut size={18} />
                     Đăng xuất
                   </button>
                 </div>

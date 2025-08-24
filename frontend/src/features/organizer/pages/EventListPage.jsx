@@ -1,6 +1,6 @@
 // frontend/src/features/organizer/pages/EventListPage.jsx
 import React, { useMemo, useRef, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import NavbarLoggedIn from "../../../components/NavbarLoggedIn";
 import { FiSearch, FiClock, FiMapPin, FiMoreVertical, FiEye } from "react-icons/fi";
 import { TbEdit, TbChartBar, TbTrash } from "react-icons/tb";
@@ -34,7 +34,9 @@ export default function EventListPage() {
         {/* Breadcrumb bar */}
         <div className="bg-black/70">
           <div className="max-w-6xl mx-auto px-6 py-3 text-sm">
-            <span className="text-white/80">Trang chủ</span>
+            <Link to="/" className="text-white/80 hover:text-white transition-colors">Trang chủ</Link>
+            <span className="mx-2 text-white/40">›</span>
+            <Link to="/account" className="text-white/80 hover:text-white transition-colors">Tài khoản</Link>
             <span className="mx-2 text-white/40">›</span>
             <span className="font-medium">Sự kiện của tôi</span>
           </div>
@@ -60,9 +62,8 @@ export default function EventListPage() {
                 <button
                   key={f.key}
                   onClick={() => setFilter(f.key)}
-                  className={`flex-1 rounded-full py-2 text-sm font-medium transition ${
-                    active ? "bg-emerald-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
+                  className={`flex-1 rounded-full py-2 text-sm font-medium transition ${active ? "bg-emerald-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
                 >
                   {f.label}
                 </button>
@@ -85,7 +86,7 @@ export default function EventListPage() {
                       NHÁP
                     </div>
                   )}
-                  
+
                   {/* Status badge for pending events */}
                   {ev.originalStatus === 'pending' && (
                     <div className="absolute top-3 left-3 bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium">
@@ -135,7 +136,7 @@ export default function EventListPage() {
                           </MenuItem>
                         </>
                       )}
-                      
+
                       {ev.status === 'past' && ev.originalStatus !== 'draft' && (
                         <>
                           <MenuItem icon={<FiEye />} onClick={() => navigate(`/event/${ev.id}`)}>
@@ -146,7 +147,7 @@ export default function EventListPage() {
                           </MenuItem>
                         </>
                       )}
-                      
+
                       {ev.status === 'upcoming' && ev.originalStatus !== 'draft' && ev.originalStatus !== 'pending' && (
                         <>
                           <MenuItem icon={<FiEye />} onClick={() => navigate(`/event/${ev.id}`)}>
@@ -154,7 +155,7 @@ export default function EventListPage() {
                           </MenuItem>
                         </>
                       )}
-                      
+
                       {ev.originalStatus === 'pending' && (
                         <>
                           <MenuItem icon={<FiEye />} onClick={() => navigate(`/event/${ev.id}`)}>
@@ -228,9 +229,8 @@ function MenuItem({ icon, children, onClick, danger }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 text-left ${
-        danger ? "text-red-600" : "text-gray-800"
-      }`}
+      className={`w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 text-left ${danger ? "text-red-600" : "text-gray-800"
+        }`}
     >
       <span className={`${danger ? "text-red-600" : "text-emerald-600"}`}>{icon}</span>
       <span>{children}</span>
@@ -252,9 +252,8 @@ function Pagination({ page = 1, totalPages = 68, onChange }) {
             <button
               key={p}
               onClick={() => onChange?.(p)}
-              className={`w-8 h-8 rounded-md grid place-items-center text-sm font-medium ${
-                page === p ? "bg-emerald-500 text-white" : "text-gray-800 hover:bg-gray-100"
-              }`}
+              className={`w-8 h-8 rounded-md grid place-items-center text-sm font-medium ${page === p ? "bg-emerald-500 text-white" : "text-gray-800 hover:bg-gray-100"
+                }`}
             >
               {p}
             </button>

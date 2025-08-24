@@ -1,10 +1,11 @@
 // frontend/src/features/organizer/pages/CreateEventPage.jsx
 import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import NavbarLoggedIn from "../../../components/NavbarLoggedIn";
 import { RiTicket2Line } from "react-icons/ri";
 import { TbPlus, TbTag, TbTrash } from "react-icons/tb";
 import { RxCross2 } from "react-icons/rx";
+import { FiHome, FiUser } from "react-icons/fi";
 
 
 export default function CreateEventPage() {
@@ -103,7 +104,9 @@ export default function CreateEventPage() {
         {/* Breadcrumb */}
         <div className="bg-black/70">
           <div className="max-w-6xl mx-auto px-6 py-3 text-sm">
-            <span className="text-white/80">Trang chủ</span>
+            <Link to="/" className="text-white/80 hover:text-white transition-colors">Trang chủ</Link>
+            <span className="mx-2 text-white/40">›</span>
+            <Link to="/account" className="text-white/80 hover:text-white transition-colors">Tài khoản</Link>
             <span className="mx-2 text-white/40">›</span>
             <span className="font-medium">Tạo sự kiện mới</span>
           </div>
@@ -111,10 +114,10 @@ export default function CreateEventPage() {
         <div className="max-w-5xl mx-auto px-6 py-8">
           <Stepper step={step} setStep={setStep} />
           {step === 1 && (
-            <StepBasic 
-              basic={basic} 
-              setBasic={setBasic} 
-              onNext={next} 
+            <StepBasic
+              basic={basic}
+              setBasic={setBasic}
+              onNext={next}
               onSaveDraft={handleSaveDraft} // <-- pass handler
             />
           )}
@@ -160,9 +163,8 @@ function Stepper({ step, setStep }) {
           return (
             <button
               key={it.id}
-              className={`rounded-full py-2 text-sm font-medium transition ${
-                active ? "bg-emerald-500 text-white" : "bg-gray-200 text-gray-700"
-              }`}
+              className={`rounded-full py-2 text-sm font-medium transition ${active ? "bg-emerald-500 text-white" : "bg-gray-200 text-gray-700"
+                }`}
               onClick={() => setStep(it.id)}
             >
               {it.label}
@@ -183,7 +185,7 @@ function StepBasic({ basic, setBasic, onNext, onSaveDraft }) {
     const file = e.target.files?.[0];
     if (file) {
       setBasic(b => ({ ...b, [field]: file }));
-      
+
       // Create preview URL
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -199,8 +201,8 @@ function StepBasic({ basic, setBasic, onNext, onSaveDraft }) {
       onClick={() => ref.current?.click()}
     >
       {preview ? (
-        <img 
-          src={preview} 
+        <img
+          src={preview}
           alt={`${label} preview`}
           className="w-full h-full object-cover"
         />
@@ -231,11 +233,10 @@ function StepBasic({ basic, setBasic, onNext, onSaveDraft }) {
   const input = (props) => (
     <input
       {...props}
-      className={`w-full bg-white text-black rounded-md px-3 py-2 outline-none ${
-        props.disabled 
-          ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+      className={`w-full bg-white text-black rounded-md px-3 py-2 outline-none ${props.disabled
+          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
           : ''
-      } ${props.className || ""}`}
+        } ${props.className || ""}`}
     />
   );
 
@@ -678,8 +679,8 @@ function StepPayout({ payout, setPayout, onBack, handleSubmit, onSaveDraft }) {
 
       <div className="mt-8 flex justify-between">
         <div className="flex gap-2">
-          <button 
-            onClick={onBack} 
+          <button
+            onClick={onBack}
             className="px-4 py-2 rounded-md bg-white/10 hover:bg-white/20"
           >
             Quay lại

@@ -1,8 +1,12 @@
 // frontend/src/features/customer/pages/PaymentPage.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link, useParams, useSearchParams } from "react-router-dom";
 import QRCode from "react-qr-code"; // npm i react-qr-code
+import { FiHome, FiUser, FiCreditCard, FiArrowLeft } from "react-icons/fi";
 import NavbarLoggedIn from "../../../components/NavbarLoggedIn";
+import { useSelector, useDispatch } from 'react-redux';
+import { setPaymentStatus, resetPayment, completePayment } from '../slices/paymentSlice.js';
+import { fetchPurchaseHistory } from '../slices/purchaseHistorySlice';
 
 const fmtVND = (n) =>
   (n ?? 0).toLocaleString("vi-VN", { maximumFractionDigits: 0 }) + " VND";
@@ -18,11 +22,55 @@ const FALLBACK = {
 export default function PaymentPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const params = useParams();
+  const [searchParams] = useSearchParams();
 
-  const data = { ...FALLBACK, ...(state?.payment ?? {}) };
+  // Get event ID from URL params (prioritize eventId param from new route structure)
+  const eventId = params.eventId || params.id || searchParams.get('eventId') || '1';
+
+  // Debug log to check eventId and payment data
+  console.log('PaymentPage - eventId:', eventId, 'params:', params);
+  console.log('PaymentPage - payment data:', state?.payment);
+
+  // Get payment state from Redux
+  const { paymentMethod, paymentStatus, isLoading } = useSelector((state) => state.payment);
+
+  const data = { ...FALLBACK, ...(state?.payment ?? {}), paymentMethod };
 
   const [secondsLeft, setSecondsLeft] = useState(10 * 60); // 10:00 countdown
-  const [showSuccess, setShowSuccess] = useState(false);    
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Handle payment completion
+  const handleCompletePayment = async () => {
+    const databaseOrderId = data.databaseOrderId;
+
+    if (databaseOrderId) {
+      try {
+        dispatch(setPaymentStatus('processing'));
+
+        // Call API to complete payment
+        const result = await dispatch(completePayment(databaseOrderId));
+
+        if (completePayment.fulfilled.match(result)) {
+          setTimeout(() => {
+            setShowSuccess(true);
+          }, 1000);
+        } else {
+          alert('Lỗi hoàn thành thanh toán: ' + (result.payload || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Payment completion error:', error);
+        alert('Có lỗi xảy ra khi hoàn thành thanh toán');
+      }
+    } else {
+      // Fallback for demo mode
+      dispatch(setPaymentStatus('processing'));
+      setTimeout(() => {
+        setShowSuccess(true);
+      }, 1000);
+    }
+  };
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -41,6 +89,43 @@ export default function PaymentPage() {
       <NavbarLoggedIn />
       <div className="min-h-screen bg-black text-white">
         <div className="max-w-6xl mx-auto px-6 py-8">
+          {/* Breadcrumb Navigation */}
+          <div className="mb-6">
+            <nav className="flex items-center space-x-2 text-sm text-gray-400">
+              <Link to="/" className="hover:text-white transition-colors flex items-center">
+                <FiHome className="w-4 h-4 mr-1" />
+                Trang chủ
+              </Link>
+              <span>/</span>
+              <Link to="/account" className="hover:text-white transition-colors flex items-center">
+                <FiUser className="w-4 h-4 mr-1" />
+                Tài khoản
+              </Link>
+              <span>/</span>
+              <span className="text-white flex items-center">
+                <FiCreditCard className="w-4 h-4 mr-1" />
+                Thanh toán
+              </span>
+            </nav>
+          </div>
+
+          {/* Top bar (Back + Title) */}
+          <div className="mb-6">
+            <div className="grid grid-cols-3 items-center">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 text-white/80 hover:text-white"
+              >
+                <FiArrowLeft className="text-lg" />
+                <span className="text-sm">Trở về</span>
+              </button>
+              <h1 className="text-center tracking-wide font-semibold">
+                THANH TOÁN
+              </h1>
+              <div /> {/* spacer */}
+            </div>
+          </div>
+
           {/* Grid: main card + countdown */}
           <div className="grid grid-cols-12 gap-6">
             {/* Main white card */}
@@ -81,7 +166,7 @@ export default function PaymentPage() {
                   <div
                     className="relative w-fit mx-auto cursor-pointer"   // <- clickable
                     title="Bấm để giả lập thanh toán thành công"
-                    onClick={() => setShowSuccess(true)}                 // <- NEW: show popup
+                    onClick={handleCompletePayment}
                   >
                     <div className="p-4 bg-white rounded-lg">
                       <QRCode value={data.qrData} size={260} />
@@ -125,6 +210,16 @@ export default function PaymentPage() {
             </div>
           </div>
 
+          {/* Processing overlay */}
+          {(isLoading || paymentStatus === 'processing') && !showSuccess && (
+            <div className="fixed inset-0 z-[1500] bg-black/60 backdrop-blur-sm flex items-center justify-center">
+              <div className="bg-white rounded-xl p-6 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+                <div className="text-black">Đang xử lý thanh toán...</div>
+              </div>
+            </div>
+          )}
+
           {/* -------- Success Overlay (giả lập) -------- */}
           {showSuccess && (
             <div className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-sm flex items-center justify-center">
@@ -132,11 +227,21 @@ export default function PaymentPage() {
                 <div className="text-emerald-600 font-semibold text-lg mb-4">
                   Đơn hàng đã được thanh toán thành công!
                 </div>
+                <div className="text-sm text-gray-600 mb-4">
+                  Phương thức: {paymentMethod?.toUpperCase() || 'VNPAY'}
+                </div>
                 <button
-                  onClick={() => navigate("/")}
+                  onClick={() => {
+                    dispatch(setPaymentStatus('success'));
+                    dispatch(resetPayment());
+                    // Real-time update: fetch purchase history after payment
+                    const userId = JSON.parse(localStorage.getItem('user'))?.id;
+                    if (userId) dispatch(fetchPurchaseHistory(userId));
+                    navigate("/account/purchase-history");
+                  }}
                   className="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-md"
                 >
-                  Về trang chủ
+                  Xem vé của tôi
                 </button>
               </div>
             </div>

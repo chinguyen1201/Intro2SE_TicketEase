@@ -1,10 +1,17 @@
 // frontend/src/components/ProtectedRoute.jsx
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useSelector } from 'react-redux';
 
 const ProtectedRoute = ({ children, requiredRole, requiredPermission }) => {
-  const { user, isAuthenticated, isLoading, hasPermission } = useAuth();
+  const { user, isAuthenticated, isLoading } = useSelector(state => state.auth);
+
+  // Helper function to check permissions
+  const hasPermission = (permission) => {
+    if (!user) return false;
+    // Add your permission checking logic here
+    return user.permissions?.includes(permission) || user.role === 'admin';
+  };
 
   // Show loading while checking authentication
   if (isLoading) {
@@ -30,7 +37,7 @@ const ProtectedRoute = ({ children, requiredRole, requiredPermission }) => {
         'organizer': '/organizer/dashboard',
         'customer': '/'
       }[user?.role] || '/';
-      
+
       return <Navigate to={redirectPath} replace />;
     }
   }
@@ -42,7 +49,7 @@ const ProtectedRoute = ({ children, requiredRole, requiredPermission }) => {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
           <p className="text-gray-600 mb-4">You don't have permission to access this page.</p>
-          <button 
+          <button
             onClick={() => window.history.back()}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
